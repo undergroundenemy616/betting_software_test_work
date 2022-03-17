@@ -30,4 +30,5 @@ jobs:
         run: |
           cd src
           docker build . -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}/${{ env.GIT_BRANCH }}:latest -f Dockerfile
+          docket login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}/${{ env.GIT_BRANCH }}:latest
