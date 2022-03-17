@@ -8,7 +8,7 @@ Python 3.9, Fast Api, MongoDB, Nginx, Docker.
 
 После клонирования проекта локально необходимо выполнить команды:
 ```
-docker-compose --env-file=src/.env up
+docker-compose --env-file=src/.env up -d
 bash setupDB.sh
 ```
 
