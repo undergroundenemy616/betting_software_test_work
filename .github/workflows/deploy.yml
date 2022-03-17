@@ -32,7 +32,7 @@ jobs:
         run: |
           echo SSH_PATH="$HOME/.ssh" >> $GITHUB_ENV
           echo PATH_TO_APP="/home/${{ secrets.SSH_USER }}/github/${{ github.event.repository.name }}/${{ env.GIT_BRANCH }}" >> $GITHUB_ENV
-          echo ENV_VARS="DOCKER_HUB_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}/${{ env.GIT_BRANCH }}:latest \
+          echo ENV_VARS="DOCKER_HUB_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}-${{ env.GIT_BRANCH }}:latest \
           SECRET_KEY=${{ env.SECRET_KEY }} DEBUG=${{ env.DEBUG }} TESTING=${{ env.TESTING }} MONGO_DETAILS=${{ env.MONGO_DETAILS }} \
           MONGO_DB_NAME=${{ env.MONGO_DB_NAME }} MONGO_DB_COLLECTION=${{ env.MONGO_DB_COLLECTION }} SENTRY_DSN=${{ env.SENTRY_DSN }} >> $GITHUB_ENV
 
@@ -48,8 +48,8 @@ jobs:
           mkdir -p "${{ env.SSH_PATH }}"
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > "${{ env.SSH_PATH }}/deploy_key"
           chmod 600 "${{ env.SSH_PATH }}/deploy_key"
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER }} -i ${{ env.SSH_PATH }}/deploy_key -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} "mkdir -p ${{ env.PATH_TO_APP }}"
-          rsync -au --relative -e "ssh -i ${{ env.SSH_PATH }}/deploy_key -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }}" docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SERVER }}:${{ env.PATH_TO_APP }}
-          ssh -i ${{ env.SSH_PATH }}/deploy_key -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SERVER }} ${{ env.ENV_VARS }} \
+          ssh ${{ env.SSH_USER }}@${{ env.SERVER }} -i ${{ env.SSH_PATH }}/deploy_key -o StrictHostKeyChecking=no -p ${{ env.SSH_PORT }} "mkdir -p ${{ env.PATH_TO_APP }}"
+          rsync -au --relative -e "ssh -i ${{ env.SSH_PATH }}/deploy_key -o StrictHostKeyChecking=no -p ${{ env.SSH_PORT }}" docker-compose.yml ${{ env.SSH_USER }}@${{ env.SERVER }}:${{ env.PATH_TO_APP }}
+          ssh -i ${{ env.SSH_PATH }}/deploy_key -o StrictHostKeyChecking=no -p ${{ env.SSH_PORT }} ${{ env.SSH_USER }}@${{ env.SERVER }} ${{ env.ENV_VARS }} \
           "docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}"
-          ssh -i ${{ env.SSH_PATH }}/deploy_key -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SERVER }} ${{ env.ENV_VARS }} "bash -c '${{ env.COMMAND }}'"
+          ssh -i ${{ env.SSH_PATH }}/deploy_key -o StrictHostKeyChecking=no -p ${{ env.SSH_PORT }} ${{ env.SSH_USER }}@${{ env.SERVER }} ${{ env.ENV_VARS }} "bash -c '${{ env.COMMAND }}'"
