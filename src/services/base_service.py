@@ -78,7 +78,3 @@ def get_base_service(
     return BaseService(
         db_adapter=db_adapter
     )
-
-
-
-
