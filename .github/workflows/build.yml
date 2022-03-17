@@ -4,13 +4,18 @@ on:
   push:
     branches:
       - master
-#      - production
+      - production
 
 jobs:
   build:
     name: build
     runs-on: ubuntu-latest
     steps:
+      - name: "Set branch env"
+        shell: bash
+        run: |
+          echo "GIT_BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
+
       - name: "Checkout code"
         uses: actions/checkout@v2
 
@@ -24,5 +29,5 @@ jobs:
         shell: bash
         run: |
           cd src
-          docker build . -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest -f Dockerfile
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest
+          docker build . -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}-${{ env.GIT_BRANCH }}:latest -f Dockerfile
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}-${{ env.GIT_BRANCH }}:latest

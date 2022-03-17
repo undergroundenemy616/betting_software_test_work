@@ -1,10 +1,12 @@
+import base64
 from functools import lru_cache
+
 from fastapi import Depends
 
 from db.mongo_adapter import AbstractDBAdapter, get_mongo
-import base64
-from models.base import BaseModel, EncodedKeyResponseModel, DuplicatesResponseModel
 from exceptions import ObjectNotExists
+from models.base import (BaseModel, DuplicatesResponseModel,
+                         EncodedKeyResponseModel)
 
 
 class BaseService:
@@ -14,9 +16,8 @@ class BaseService:
 
     @staticmethod
     def __generate_encoded_key(body: dict) -> str:
-        encoded_key = (base64.b64encode("".join([key + str(value) for key, value in body.items()])
-                                        .encode('UTF-8'))
-                       .decode('UTF-8'))
+        key_value_sum = "".join([key + str(value) for key, value in body.items()])
+        encoded_key = (base64.b64encode(key_value_sum.encode('UTF-8')).decode('UTF-8'))
         return encoded_key
 
     async def get_object_by_encoded_key(self, encoded_key: str) -> BaseModel:
@@ -37,6 +38,7 @@ class BaseService:
             await self.db_adapter.add_object_to_db(
                 obj.dict()
             )
+
         return EncodedKeyResponseModel(encoded_key=encoded_key)
 
     async def delete_object(self, encoded_key: str) -> None:
@@ -64,8 +66,8 @@ class BaseService:
 
     async def get_duplicates_statistics(self) -> DuplicatesResponseModel:
         pipeline = [{'$group': {'_id': 0, 'sum': {'$sum': '$duplicates_count'}}}]
-        objects_count = await self.db_adapter.get_objects_count()
-        duplicates_count = await self.db_adapter.aggregate_objects(pipeline=pipeline)
+        objects_count = await self.db_adapter.get_objects_count() # noqa
+        duplicates_count = await self.db_adapter.aggregate_objects(pipeline=pipeline) # noqa
         duplicates_percentage = (objects_count / duplicates_count['sum']) * 100
         return DuplicatesResponseModel(duplicates_percentage=duplicates_percentage)
 
@@ -77,7 +79,3 @@ def get_base_service(
     return BaseService(
         db_adapter=db_adapter
     )
-
-
-
-

@@ -2,10 +2,10 @@ from typing import Optional
 
 import backoff
 from motor.motor_asyncio import AsyncIOMotorClient
-from models.base import BaseModel
-from core.config import settings
 
+from core.config import settings
 from db.abstract_adapter import AbstractDBAdapter
+from models.base import BaseModel
 
 mongo_client: Optional[AsyncIOMotorClient] = None
 
@@ -47,10 +47,7 @@ class MongoAdapter(AbstractDBAdapter):
 
     @backoff.on_exception(backoff.expo, ConnectionError)
     async def get_object_from_db(self, **kwargs):
-        collection = getattr(self.mongo_client, self.database_name).get_collection(
-            self.collection_name
-        )
-        obj = await collection.find_one(kwargs)
+        obj = await self.__collection.find_one(kwargs)
         if obj:
             return self.model(**obj)
         return None
