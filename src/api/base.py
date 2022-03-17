@@ -78,7 +78,7 @@ async def update_obj(
 
 @router.get(
     '/statistic',
-    response_description='Получаем процент дубликатов '
+    response_description='Возвращает процент дубликатов '
                          'от количества общих запросов',
     response_model=DuplicatesResponseModel
 )
