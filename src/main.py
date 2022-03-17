@@ -1,9 +1,11 @@
 import logging
 
+import sentry_sdk
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from motor.motor_asyncio import AsyncIOMotorClient
+from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
 
 from api import base
 from core.config import settings
@@ -29,11 +31,16 @@ async def startup():
 async def shutdown():
     await mongo_adapter.mongo_client.close()
 
+sentry_sdk.init(dsn=settings.SENTRY_DSN)
+
+
 app.logger = logging.getLogger(__name__)
 app.logger.setLevel(logging.INFO)
 
 
 app.include_router(base.router, prefix='/api')
+
+app.add_middleware(SentryAsgiMiddleware)
 
 if __name__ == '__main__':
     uvicorn.run(
