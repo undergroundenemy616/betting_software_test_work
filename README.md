@@ -1,1 +1,9 @@
-# betting_software_test_work
+# Тестовое задание для Betting Software
+
+## Как запустить проект:
+
+После клонирования проекта локально необходимо выполнить команды:
+```
+docker-compose up
+bash setupDB.sh
+```
