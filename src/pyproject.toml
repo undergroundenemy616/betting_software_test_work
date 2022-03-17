@@ -23,6 +23,7 @@ motor = "^2.5.1"
 backoff = "^1.11.1"
 pymy = "^0.0.8"
 mypy = "^0.941"
+sentry-sdk = "^1.5.7"
 
 [tool.poetry.dev-dependencies]
 
