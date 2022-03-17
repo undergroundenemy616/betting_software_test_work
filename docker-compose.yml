@@ -1,0 +1,180 @@
+services:
+    api:
+      build:
+        context: src/
+        dockerfile: Dockerfile
+      expose:
+        - 8000
+      volumes:
+        - ./src:/code
+      env_file:
+        - src/.env
+      environment:
+        PYTHONUNBUFFERED: 1
+      networks:
+        - betting_software
+
+    nginx:
+      image: nginx:1.19.2
+      volumes:
+        - ./etc/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+        - ./etc/nginx/conf.d:/etc/nginx/conf.d:ro
+        - /tmp/logs/nginx/:/var/log/nginx/
+      depends_on:
+        - api
+      ports:
+        - 8080:80
+      networks:
+        - betting_software
+
+#    filebeat-ugc-2:
+#      image: docker.elastic.co/beats/filebeat:7.3.2
+#      volumes:
+#        - /tmp/logs/nginx:/var/log/nginx:ro
+#        - ./deploy/filebeat.yml:/usr/share/filebeat/filebeat.yml
+#      depends_on:
+#        - app-ugc-2
+#        - nginx-ugc-2
+#      networks:
+#        - elk_stack
+#        - movies_network
+
+    mongors1n1:
+      container_name: mongors1n1
+      image: mongo
+      command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
+      ports:
+        - 27017:27017
+      expose:
+        - "27017"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - /tmp/mongo_cluster/data1:/data/db
+      networks:
+        - betting_software
+
+    mongors1n2:
+      container_name: mongors1n2
+      image: mongo
+      command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
+      ports:
+        - 27027:27017
+      expose:
+        - "27017"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - /tmp/mongo_cluster/data2:/data/db
+      networks:
+        - betting_software
+
+    mongors1n3:
+      container_name: mongors1n3
+      image: mongo
+      command: mongod --shardsvr --replSet mongors1 --dbpath /data/db --port 27017
+      ports:
+        - 27037:27017
+      expose:
+        - "27017"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - /tmp/mongo_cluster/data3:/data/db
+      networks:
+        - betting_software
+
+    mongors2n1:
+      container_name: mongors2n1
+      image: mongo
+      command: mongod --shardsvr --replSet mongors2 --dbpath /data/db --port 27017
+      ports:
+        - 27047:27017
+      expose:
+        - "27017"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - /tmp/mongo_cluster/data4:/data/db
+      networks:
+        - betting_software
+
+    mongors2n2:
+      container_name: mongors2n2
+      image: mongo
+      command: mongod --shardsvr --replSet mongors2 --dbpath /data/db --port 27017
+      ports:
+        - 27057:27017
+      expose:
+        - "27017"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - /tmp/mongo_cluster/data5:/data/db
+      networks:
+        - betting_software
+
+    mongors2n3:
+      container_name: mongors2n3
+      image: mongo
+      command: mongod --shardsvr --replSet mongors2 --dbpath /data/db --port 27017
+      ports:
+        - 27067:27017
+      expose:
+        - "27017"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - /tmp/mongo_cluster/data6:/data/db
+      networks:
+        - betting_software
+
+    mongocfg1:
+      container_name: mongocfg1
+      image: mongo
+      command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
+      expose:
+        - "27017"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - /tmp/mongo_cluster/config1:/data/db
+      networks:
+        - betting_software
+
+    mongocfg2:
+      container_name: mongocfg2
+      image: mongo
+      command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
+      expose:
+        - "27017"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - /tmp/mongo_cluster/config2:/data/db
+      networks:
+        - betting_software
+
+    mongocfg3:
+      container_name: mongocfg3
+      image: mongo
+      command: mongod --configsvr --replSet mongors1conf --dbpath /data/db --port 27017
+      expose:
+        - "27017"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - /tmp/mongo_cluster/config3:/data/db
+      networks:
+        - betting_software
+
+    mongos1:
+      container_name: mongos1
+      image: mongo
+      depends_on:
+        - mongocfg1
+        - mongocfg2
+      command: mongos --configdb mongors1conf/mongocfg1:27017,mongocfg2:27017,mongocfg3:27017 --port 27017
+      ports:
+        - 27019:27017
+      expose:
+        - "27017"
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+      networks:
+        - betting_software
+
+networks:
+ betting_software:
+    name: betting_software
