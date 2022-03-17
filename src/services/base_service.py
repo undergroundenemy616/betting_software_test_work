@@ -66,8 +66,8 @@ class BaseService:
 
     async def get_duplicates_statistics(self) -> DuplicatesResponseModel:
         pipeline = [{'$group': {'_id': 0, 'sum': {'$sum': '$duplicates_count'}}}]
-        objects_count = await self.db_adapter.get_objects_count()
-        duplicates_count = await self.db_adapter.aggregate_objects(pipeline=pipeline)
+        objects_count = await self.db_adapter.get_objects_count() # noqa
+        duplicates_count = await self.db_adapter.aggregate_objects(pipeline=pipeline) # noqa
         duplicates_percentage = (objects_count / duplicates_count['sum']) * 100
         return DuplicatesResponseModel(duplicates_percentage=duplicates_percentage)
 
