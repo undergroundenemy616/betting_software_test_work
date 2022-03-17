@@ -18,3 +18,9 @@ bash setupDB.sh
 
 ## Про отказоустойчивость:
 Для всех запросов к базе применем паттерн back-off.
+
+## Про CI/CD:
+Было реализовано несколько github actions:
+1) Билд и пуш образа в Docker Hub при пуше в ветки master/production.
+2) Анализ кода линтером flake8 при пул реквесте в ветки master/production
+3) Ручной деплой приложения приложения ветки master/production. Все переменные окружения для деплоя (ip хоста, ssh юзернейм, ssh port и т.д.) должны указываться в вспомогательном репозитории для деплоя (https://github.com/undergroundenemy616/betting_software_test_work_deploy).
