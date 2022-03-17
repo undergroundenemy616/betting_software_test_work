@@ -29,6 +29,9 @@ jobs:
         shell: bash
         run: |
           cd src
+          echo ${{ github.event.repository.name }}
+          echo ${{ github.event.repository.name }}
+          echo ${{ github.event.repository.name }}
+          echo ${{ github.event.repository.name }}
           docker build . -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest -f Dockerfile
-          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}/${{ env.GIT_BRANCH }}:latest
