@@ -29,5 +29,5 @@ jobs:
         shell: bash
         run: |
           cd src
-          docker build . -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}/${{GIT_BRANCH}}:latest -f Dockerfile
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}/${{GIT_BRANCH}}:latest
+          docker build . -t ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}/${{ env.GIT_BRANCH }}:latest -f Dockerfile
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}/${{ env.GIT_BRANCH }}:latest
