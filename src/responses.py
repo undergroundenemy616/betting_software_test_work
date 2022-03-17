@@ -1,6 +1,6 @@
 from http import HTTPStatus
-from starlette.responses import JSONResponse
 
+from starlette.responses import JSONResponse
 
 NOT_FOUND_RESPONSE = JSONResponse(
             content={'type': 'error', 'message': 'object doesn\'t exist'},

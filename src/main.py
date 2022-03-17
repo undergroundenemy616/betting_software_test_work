@@ -1,14 +1,14 @@
+import logging
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from core.logger import LOGGING
-import logging
-from db import mongo_adapter
-from core.config import settings
 from api import base
-
+from core.config import settings
+from core.logger import LOGGING
+from db import mongo_adapter
 
 app = FastAPI(
     docs_url='/api/openapi',
