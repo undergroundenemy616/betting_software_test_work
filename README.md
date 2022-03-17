@@ -24,3 +24,7 @@ bash setupDB.sh
 1) Билд и пуш образа в Docker Hub при пуше в ветки master/production.
 2) Анализ кода линтером flake8 при пул реквесте в ветки master/production
 3) Ручной деплой приложения ветки master/production. Все переменные окружения для деплоя (ip хоста, ssh юзернейм, ssh port и т.д.) должны указываться в вспомогательном репозитории для деплоя (https://github.com/undergroundenemy616/betting_software_test_work_deploy).
+
+
+## Про мониторинг ошибок:
+Был подключен Sentry.
