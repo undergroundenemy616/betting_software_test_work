@@ -38,6 +38,7 @@ class BaseService:
             await self.db_adapter.add_object_to_db(
                 obj.dict()
             )
+
         return EncodedKeyResponseModel(encoded_key=encoded_key)
 
     async def delete_object(self, encoded_key: str) -> None:
