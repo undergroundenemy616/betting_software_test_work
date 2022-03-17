@@ -1,0 +1,55 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    branches:
+      - master
+      - production
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v2
+
+      - name: "Set branch env"
+        shell: bash
+        run: |
+          echo "GIT_BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
+
+      - name: "Set up project environments"
+        uses: Steph0/dotenv-configserver@v1.1
+        with:
+          repository: undergroundenemy616/betting_software_test_work_deploy
+          branch: ${{ env.GIT_BRANCH }}
+          directory: ${{ env.GIT_BRANCH }}
+          token: ${{ secrets.ACTION_TOKEN }}
+
+      - name: "Set deploy envs"
+        shell: bash
+        run: |
+          echo SSH_PATH="$HOME/.ssh" >> $GITHUB_ENV
+          echo PATH_TO_APP="/home/${{ secrets.SSH_USER }}/github/${{ github.event.repository.name }}/${{ env.GIT_BRANCH }}" >> $GITHUB_ENV
+          echo ENV_VARS="DOCKER_HUB_IMAGE_NAME=${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}/${{ env.GIT_BRANCH }}:latest \
+          SECRET_KEY=${{ env.SECRET_KEY }} DEBUG=${{ env.DEBUG }} TESTING=${{ env.TESTING }} MONGO_DETAILS=${{ env.MONGO_DETAILS }} \
+          MONGO_DB_NAME=${{ env.MONGO_DB_NAME }} MONGO_DB_COLLECTION=${{ env.MONGO_DB_COLLECTION }} SENTRY_DSN=${{ env.SENTRY_DSN }} >> $GITHUB_ENV
+
+      - name: "Set deploy command string"
+        shell: bash
+        run: |
+          echo COMMAND="cd \"${{ env.PATH_TO_APP }}\" && docker-compose pull && docker-compose -p ${{ github.event.repository.name }}-${{ env.GIT_BRANCH }} down && docker network prune --force && docker-compose -p ${{ github.event.repository.name }}-${{ env.GIT_BRANCH }} up -d" >> $GITHUB_ENV
+
+      - name: "Create directory and send compose file to server"
+        shell: bash
+        run: |
+          docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}
+          mkdir -p "${{ env.SSH_PATH }}"
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > "${{ env.SSH_PATH }}/deploy_key"
+          chmod 600 "${{ env.SSH_PATH }}/deploy_key"
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SERVER }} -i ${{ env.SSH_PATH }}/deploy_key -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} "mkdir -p ${{ env.PATH_TO_APP }}"
+          rsync -au --relative -e "ssh -i ${{ env.SSH_PATH }}/deploy_key -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }}" docker-compose.yml ${{ secrets.SSH_USER }}@${{ secrets.SERVER }}:${{ env.PATH_TO_APP }}
+          ssh -i ${{ env.SSH_PATH }}/deploy_key -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SERVER }} ${{ env.ENV_VARS }} \
+          "docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_TOKEN }}"
+          ssh -i ${{ env.SSH_PATH }}/deploy_key -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SERVER }} ${{ env.ENV_VARS }} "bash -c '${{ env.COMMAND }}'"
